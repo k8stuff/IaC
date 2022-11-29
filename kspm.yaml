@@ -1,5 +1,5 @@
 ---
-# Source: sysdig-deploy/charts/agent/templates/psp.yaml
+#Source: sysdig-deploy/charts/agent/templates/psp.yaml
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
