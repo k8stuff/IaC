@@ -1,0 +1,1405 @@
+---
+# Source: sysdig-deploy/charts/agent/templates/psp.yaml
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: sysdig-agent
+  namespace: sysdig-agent
+spec:
+  allowedCapabilities:
+  - '*'
+  fsGroup:
+    rule: RunAsAny
+  hostIPC: true
+  hostNetwork: true
+  hostPID: true
+  hostPorts:
+  - max: 65536
+    min: 1
+  privileged: true
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+  - '*'
+---
+# Source: sysdig-deploy/charts/nodeAnalyzer/templates/psp.yaml
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: sysdig-node-analyzer
+spec:
+  allowedCapabilities:
+  - '*'
+  fsGroup:
+    rule: RunAsAny
+  hostIPC: true
+  hostNetwork: true
+  hostPID: true
+  hostPorts:
+  - max: 65536
+    min: 1
+  privileged: true
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+  - '*'
+---
+# Source: sysdig-deploy/charts/agent/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sysdig-agent
+  namespace: sysdig-agent
+  labels:
+    helm.sh/chart: agent-1.5.22
+    app.kubernetes.io/name: agent
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.8.1"
+    app.kubernetes.io/managed-by: Helm
+    app: "sysdig-agent"
+---
+# Source: sysdig-deploy/charts/kspmCollector/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kspm-collector
+  namespace: sysdig-agent 
+  labels:
+    helm.sh/chart: kspmCollector-0.1.10
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "1.4.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: sysdig-deploy/charts/nodeAnalyzer/templates/serviceaccount-node-analyzer.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: node-analyzer
+  labels:
+    helm.sh/chart: nodeAnalyzer-1.7.12
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.6.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: sysdig-deploy/charts/agent/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sysdig-agent
+  namespace: sysdig-agent 
+  labels:
+    helm.sh/chart: agent-1.5.22
+    app.kubernetes.io/name: agent
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.8.1"
+    app.kubernetes.io/managed-by: Helm
+    app: "sysdig-agent"
+type: Opaque
+data:
+ access-key : "MTExMTExMTE="
+---
+# Source: sysdig-deploy/charts/kspmCollector/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sysdig-kspmcollector
+  namespace: sysdig-agent 
+  labels:
+    helm.sh/chart: kspmCollector-0.1.10
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "1.4.0"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+ access-key : "MTExMTExMTE="
+---
+# Source: sysdig-deploy/charts/nodeAnalyzer/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sysdig-nodeanalyzer
+  labels:
+    helm.sh/chart: nodeAnalyzer-1.7.12
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.6.0"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+ access-key : "MTExMTExMTE="
+---
+# Source: sysdig-deploy/charts/agent/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sysdig-agent
+  namespace: sysdig-agent
+  labels:
+    helm.sh/chart: agent-1.5.22
+    app.kubernetes.io/name: agent
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.8.1"
+    app.kubernetes.io/managed-by: Helm
+    app: "sysdig-agent"
+data:
+  dragent.yaml: |
+    new_k8s: true
+    k8s_cluster_name: Clustername
+    security:
+      enabled: true
+    commandlines_capture:
+      enabled: true
+    memdump:
+      enabled: true
+
+    collector: ingest-eu1.app.sysdig.com
+    k8s_coldstart:
+      max_parallel_cold_starts: 1
+---
+# Source: sysdig-deploy/charts/kspmCollector/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sysdig-kspmcollector
+  namespace: sysdig-agent 
+  labels:
+    helm.sh/chart: kspmCollector-0.1.10
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "1.4.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  environment: PRODUCTION
+  included_namespaces: ""
+  excluded_namespaces: ""
+  included_workloads: ""
+  excluded_workloads: ""
+  health_interval_minutes: "5"
+  external_nats_url: wss://eu1.app.sysdig.com:443
+  cluster_name: Clustername
+  nats_insecure: "true"
+---
+# Source: sysdig-deploy/charts/nodeAnalyzer/templates/configmap-benchmark-runner.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sysdig-benchmark-runner
+  labels:
+    helm.sh/chart: nodeAnalyzer-1.7.12
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.6.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  collector_endpoint: "https://eu1.app.sysdig.com"
+  debug: "false"
+---
+# Source: sysdig-deploy/charts/nodeAnalyzer/templates/configmap-host-analyzer.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sysdig-host-analyzer
+  labels:
+    helm.sh/chart: nodeAnalyzer-1.7.12
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.6.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  collector_endpoint: "https://eu1.app.sysdig.com/internal/scanning/scanning-analysis-collector"
+  debug: "false"
+  schedule: "@dailydefault"
+---
+# Source: sysdig-deploy/charts/nodeAnalyzer/templates/configmap-image-analyzer.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sysdig-image-analyzer
+  labels:
+    helm.sh/chart: nodeAnalyzer-1.7.12
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.6.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  collector_endpoint: "https://eu1.app.sysdig.com/internal/scanning/scanning-analysis-collector"
+  debug: "false"
+---
+# Source: sysdig-deploy/charts/nodeAnalyzer/templates/configmap-kspm-analyzer.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sysdig-kspm-analyzer
+  labels:
+    helm.sh/chart: nodeAnalyzer-1.7.12
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.6.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  environment: PRODUCTION
+  external_nats_url: wss://eu1.app.sysdig.com:443
+  cluster_name: Clustername
+  agent_app_name: nodeanalyzer
+---
+# Source: sysdig-deploy/charts/agent/templates/clusterrole.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: sysdig-agent
+  labels:
+    helm.sh/chart: agent-1.5.22
+    app.kubernetes.io/name: agent
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.8.1"
+    app.kubernetes.io/managed-by: Helm
+    app: "sysdig-agent"
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - replicationcontrollers
+      - services
+      - endpoints
+      - events
+      - limitranges
+      - namespaces
+      - nodes
+      - nodes/metrics
+      - nodes/proxy
+      - resourcequotas
+      - persistentvolumes
+      - persistentvolumeclaims
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - daemonsets
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - autoscaling
+    resources:
+      - horizontalpodautoscalers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - batch
+    resources:
+      - cronjobs
+      - jobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - networkpolicies
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+    resources:
+      - daemonsets
+      - deployments
+      - replicasets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+    - coordination.k8s.io
+    resources:
+    - leases
+    verbs:
+    - get
+    - list
+    - create
+    - update
+    - watch
+  - nonResourceURLs:
+    - /metrics
+    verbs:
+    - get
+  - apiGroups:
+    - storage.k8s.io
+    resources:
+    - storageclasses
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+      - "policy"
+    resources:
+      - "podsecuritypolicies"
+    resourceNames:
+      - "sysdig-agent"
+    verbs:
+      - "use"
+---
+# Source: sysdig-deploy/charts/kspmCollector/templates/clusterrole.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: sysdig-kspmcollector
+  labels:
+    helm.sh/chart: kspmCollector-0.1.10
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "1.4.0"
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups:
+      - ''
+      - 'rbac.authorization.k8s.io'
+      - 'extensions'
+      - 'apps'
+      - 'batch'
+      - 'networking.k8s.io'
+      - 'autoscaling'
+      - 'policy'
+      - 'storage.k8s.io'
+    resources:
+      - 'pods'
+      - 'pods/log'
+      - 'namespaces'
+      - 'deployments'
+      - 'daemonsets'
+      - 'statefulsets'
+      - 'jobs'
+      - 'cronjobs'
+      - 'clusterroles'
+      - 'clusterrolebindings'
+      - 'roles'
+      - 'rolebindings'
+      - 'services'
+      - 'serviceaccounts'
+      - 'nodes'
+      - 'ingresses'
+      - 'ingressclasses'
+      - 'networkpolicies'
+      - 'replicasets'
+      - 'configmaps'
+      - 'events'
+      - 'limitranges'
+      - 'persistentvolumes'
+      - 'persistentvolumeclaims'
+      - 'replicationcontrollers'
+      - 'resourcequotas'
+      - 'controllerrevisions'
+      - 'horizontalpodautoscalers'
+      - 'podsecuritypolicies'
+      - 'storageclasses'
+      - 'volumeattachments'
+    verbs:
+      - 'get'
+      - 'list'
+      - 'watch'
+---
+# Source: sysdig-deploy/charts/nodeAnalyzer/templates/clusterrole-node-analyzer.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: sysdig-node-analyzer
+  labels:
+    helm.sh/chart: nodeAnalyzer-1.7.12
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.6.0"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+    - ""
+    - apps
+    - batch
+    - extensions
+  resources:
+    - "namespaces"
+    - "deployments"
+    - "replicasets"
+    - "daemonsets"
+    - "statefulsets"
+    - "pods"
+    - "cronjobs"
+    - "jobs"
+    - "nodes"
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+    - ""
+  resources:
+    - configmaps
+    - endpoints
+    - nodes
+    - pods/log
+    - secrets
+    - serviceaccounts
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+    - rbac.authorization.k8s.io
+  resources:
+    - clusterrolebindings
+    - rolebindings
+    - roles
+  verbs:
+    - list
+- apiGroups:
+    - machineconfiguration.openshift.io
+  resources:
+    - machineconfigpools
+    - machineconfigs
+  verbs:
+    - get
+    - list
+- apiGroups:
+    - operator.openshift.io
+  resources:
+    - kubeapiservers
+    - openshiftapiservers
+  verbs:
+    - get
+    - list
+- apiGroups:
+    - config.openshift.io
+  resources:
+    - clusteroperators
+  verbs:
+    - get
+- apiGroups:
+    - security.openshift.io
+  resources:
+    - securitycontextconstraints
+  verbs:
+    - get
+    - list
+- apiGroups:
+    - "policy"
+  resources:
+    - "podsecuritypolicies"
+  resourceNames:
+    - "sysdig-node-analyzer"
+  verbs:
+    - "use"
+---
+# Source: sysdig-deploy/charts/agent/templates/clusterrolebinding.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: sysdig-agent
+  labels:
+    helm.sh/chart: agent-1.5.22
+    app.kubernetes.io/name: agent
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.8.1"
+    app.kubernetes.io/managed-by: Helm
+    app: "sysdig-agent"
+subjects:
+  - kind: ServiceAccount
+    name: sysdig-agent
+    namespace: sysdig-agent
+roleRef:
+  kind: ClusterRole
+  name: sysdig-agent
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: sysdig-deploy/charts/kspmCollector/templates/clusterrolebinding.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: sysdig-kspmcollector
+  labels:
+    helm.sh/chart: kspmCollector-0.1.10
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "1.4.0"
+    app.kubernetes.io/managed-by: Helm
+subjects:
+  - kind: ServiceAccount
+    name: kspm-collector
+    namespace: sysdig-agent
+roleRef:
+  kind: ClusterRole
+  name: sysdig-kspmcollector
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: sysdig-deploy/charts/nodeAnalyzer/templates/clusterrolebinding-node-analyzer.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: sysdig-node-analyzer
+  labels:
+    helm.sh/chart: nodeAnalyzer-1.7.12
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.6.0"
+    app.kubernetes.io/managed-by: Helm
+subjects:
+  - kind: ServiceAccount
+    name: node-analyzer
+    namespace: sysdig-agent
+roleRef:
+  kind: ClusterRole
+  name: sysdig-node-analyzer
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: sysdig-deploy/charts/agent/templates/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: sysdig-agent
+  namespace: sysdig-agent
+  labels:
+    helm.sh/chart: agent-1.5.22
+    app.kubernetes.io/name: agent
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.8.1"
+    app.kubernetes.io/managed-by: Helm
+    app: "sysdig-agent"
+    
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: agent
+      app.kubernetes.io/instance: sysdig
+  template:
+    metadata:
+      name: sysdig-agent
+      labels:
+        helm.sh/chart: agent-1.5.22
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: sysdig
+        app.kubernetes.io/version: "12.8.1"
+        app.kubernetes.io/managed-by: Helm
+        app: "sysdig-agent"
+        
+    spec:
+      serviceAccountName: sysdig-agent
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      hostPID: true
+      terminationGracePeriodSeconds: 5
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+                  - arm64
+                  - s390x
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                  - linux
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+                  - arm64
+                  - s390x
+              - key: beta.kubernetes.io/os
+                operator: In
+                values:
+                  - linux
+      initContainers:
+        - name: sysdig-agent-kmodule
+          image: quay.io/sysdig/agent-kmodule:12.8.1
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            privileged: true
+            runAsNonRoot: false
+            runAsUser: 0
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: true
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+            requests:
+              cpu: 1000m
+              memory: 348Mi
+          env:
+          volumeMounts:
+            - mountPath: /etc/modprobe.d
+              name: modprobe-d
+              readOnly: true
+            - mountPath: /host/boot
+              name: boot-vol
+              readOnly: true
+            - mountPath: /host/lib/modules
+              name: modules-vol
+              readOnly: true
+            - mountPath: /host/usr
+              name: usr-vol
+              readOnly: true
+            - mountPath: /host/etc
+              name: etc-vol
+              readOnly: true
+      containers:
+        - name: sysdig
+          image: quay.io/sysdig/agent-slim:12.8.1
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 1024Mi
+            limits:
+              cpu: 1000m
+              memory: 1024Mi
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            privileged: true
+            runAsNonRoot: false
+            runAsUser: 0
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: true
+          env:
+            - name: K8S_NODE
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          readinessProbe:
+            exec:
+              command: [ "test", "-e", "/opt/draios/logs/running" ]
+            initialDelaySeconds: 90
+          volumeMounts:
+            - mountPath: /host/etc
+              name: etc-vol
+              readOnly: true
+            - mountPath: /host/dev
+              name: dev-vol
+              readOnly: false
+            - mountPath: /host/proc
+              name: proc-vol
+              readOnly: true
+            - mountPath: /host/run
+              name: run-vol
+            - mountPath: /host/var/run
+              name: varrun-vol
+            - mountPath: /dev/shm
+              name: dshm
+            - mountPath: /opt/draios/etc/kubernetes/config
+              name: sysdig-agent-config
+            - mountPath: /opt/draios/etc/kubernetes/secrets
+              name: sysdig-agent-secrets
+            - mountPath: /etc/podinfo
+              name: podinfo
+      volumes:
+        - name: modprobe-d
+          hostPath:
+            path: /etc/modprobe.d
+        - name: dshm
+          emptyDir:
+            medium: Memory
+        - name: etc-vol
+          hostPath:
+            path: /etc
+        - name: dev-vol
+          hostPath:
+            path: /dev
+        - name: proc-vol
+          hostPath:
+            path: /proc
+        - name: boot-vol
+          hostPath:
+            path: /boot
+        - name: modules-vol
+          hostPath:
+            path: /lib/modules
+        - name: usr-vol
+          hostPath:
+            path: /usr
+        - name: run-vol
+          hostPath:
+            path: /run
+        - name: varrun-vol
+          hostPath:
+            path: /var/run
+        - name: sysdig-agent-config
+          configMap:
+            name: sysdig-agent
+            optional: true
+        - name: sysdig-agent-secrets
+          secret:
+            secretName: sysdig-agent
+        - name: podinfo
+          downwardAPI:
+            defaultMode: 420
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+              path: name
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+---
+# Source: sysdig-deploy/charts/nodeAnalyzer/templates/daemonset-node-analyzer.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: sysdig-node-analyzer
+  labels:
+    app.kubernetes.io/name: nodeanalyzer
+    helm.sh/chart: nodeAnalyzer-1.7.12
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "12.6.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nodeanalyzer
+      app.kubernetes.io/instance: sysdig
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      name: sysdig-node-analyzer
+      labels:
+        app.kubernetes.io/name: nodeanalyzer
+        helm.sh/chart: nodeAnalyzer-1.7.12
+        app.kubernetes.io/instance: sysdig
+        app.kubernetes.io/version: "12.6.0"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      volumes:
+        - name: sysdig-agent-config
+          configMap:
+            name: sysdig-agent
+            optional: true
+        # Needed for cri-o image inspection.
+        # cri-o and especially OCP 4.x by default use containers/storage to handle images, and this makes sure that the
+        # analyzer has access to the configuration. This file is mounted read-only.
+        - name: etc-containers-storage-vol
+          hostPath:
+            path: /etc/containers/storage.conf
+        # Needed for cri-o image inspection.
+        # This is the directory where image data is stored by default when using cri-o and OCP 4.x and the analyzer
+        # uses it to get the data to scan. This directory must be mounted r/w because proper access to its files through
+        # the containers/storage library is always regulated with a lockfile.
+        - name: var-lib-containers-vol
+          hostPath:
+            path: /var/lib/containers
+        # Needed for some IBM OpenShift clusters which symlink /var/run/containers/storage to contents of /var/data by default
+        - name: vardata-vol
+          hostPath:
+            path: /var/data
+        # Needed for socket access
+        - name: varrun-vol
+          hostPath:
+            path: /var/run
+        # Add custom volume here
+        - name: sysdig-image-analyzer-config
+          configMap:
+            name: sysdig-image-analyzer
+            optional: true
+        # Needed to run Benchmarks and Host Analyzer. This mount is read-only.
+        # Benchmarks include numerous checks that run tests against config files in the host filesystem. There are also
+        # checks that test various host configurations such as loaded modules and enabled security features.
+        - name: root-vol
+          hostPath:
+            path: /
+        - name: tmp-vol
+          emptyDir: {}
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+      # The following line is necessary for RBAC
+      serviceAccountName: node-analyzer
+      terminationGracePeriodSeconds: 5
+      # Use the Host Network Namespace.
+      # This is required by the Benchmark container to determine the hostname and host mac address
+      hostNetwork: true
+      # Use the Host PID namespace.
+      # This is required for Kubernetes benchmarks, as they contain tests that check Kubernetes processes running on
+      # the host
+      hostPID: true
+      containers:
+
+      - name: sysdig-kspm-analyzer
+        image: quay.io/sysdig/kspm-analyzer:1.8.0
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1536Mi
+          requests:
+            cpu: 150m
+            memory: 256Mi
+        securityContext:
+          runAsUser: 0
+          privileged: true
+          capabilities:
+            add:
+              - NET_ADMIN
+              - SYS_ADMIN
+        env:
+          - name: ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: sysdig-nodeanalyzer
+                key: access-key
+          - name: ENVIRONMENT
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspm-analyzer
+                key: environment
+          - name: EXTERNAL_NATS_URL
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspm-analyzer
+                key: external_nats_url
+          - name: CLUSTER_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspm-analyzer
+                key: cluster_name
+          - name: AGENT_APP_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspm-analyzer
+                key: agent_app_name
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: NATS_INSECURE
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspm-analyzer
+                key: nats_insecure
+                optional: true
+          - name: HTTP_PROXY
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspm-analyzer
+                key: http_proxy
+                optional: true
+          - name: HTTPS_PROXY
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspm-analyzer
+                key: https_proxy
+                optional: true
+          - name: NO_PROXY
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspm-analyzer
+                key: no_proxy
+                optional: true
+        volumeMounts:
+          - name: root-vol
+            mountPath: /host
+            readOnly: true
+          - name: tmp-vol
+            mountPath: /host/tmp
+
+      - name: sysdig-image-analyzer
+        image: quay.io/sysdig/node-image-analyzer:0.1.19
+        securityContext:
+          # The privileged flag is necessary for OCP 4.x and other Kubernetes setups that deny host filesystem access to
+          # running containers by default regardless of volume mounts. In those cases, access to the CRI socket would fail.
+          privileged: true
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1536Mi
+          requests:
+            cpu: 150m
+            memory: 512Mi
+        volumeMounts:
+          - mountPath: /var/run
+            name: varrun-vol
+          - mountPath: /etc/containers/storage.conf
+            name: etc-containers-storage-vol
+            readOnly: true
+          - mountPath: /var/lib/containers
+            name: var-lib-containers-vol
+          # Custom volume mount here
+        env:
+        - name: ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sysdig-nodeanalyzer
+              key: access-key
+        - name: IMAGE_PERIOD
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: image_period
+              optional: true
+        - name: IMAGE_CACHE_TTL
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: image_cache_ttl
+              optional: true
+        - name: REPORT_PERIOD
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: report_period
+              optional: true
+        - name: DOCKER_SOCKET_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: docker_socket_path
+              optional: true
+        - name: CRI_SOCKET_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: cri_socket_path
+              optional: true
+        - name: CONTAINERD_SOCKET_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: containerd_socket_path
+              optional: true
+        - name: AM_COLLECTOR_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: collector_endpoint
+              optional: true
+        - name: AM_COLLECTOR_TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: collector_timeout
+              optional: true
+        - name: VERIFY_CERTIFICATE
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: ssl_verify_certificate
+              optional: true
+        - name: K8S_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: K8S_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: K8S_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: debug
+              optional: true
+        - name: HTTP_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: http_proxy
+              optional: true
+        - name: HTTPS_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: https_proxy
+              optional: true
+        - name: NO_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-image-analyzer
+              key: no_proxy
+              optional: true
+      - name: sysdig-host-analyzer
+        image: quay.io/sysdig/host-analyzer:0.1.11
+        securityContext:
+          # The privileged flag is necessary for OCP 4.x and other Kubernetes setups that deny host filesystem access to
+          # running containers by default regardless of volume mounts. In those cases, access to any host related components
+          # would fail
+          privileged: true
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1536Mi
+          requests:
+            cpu: 150m
+            memory: 512Mi
+        volumeMounts:
+          - mountPath: /host
+            name: root-vol
+            readOnly: true
+        env:
+        - name: ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sysdig-nodeanalyzer
+              key: access-key
+        - name: AM_COLLECTOR_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-host-analyzer
+              key: collector_endpoint
+        - name: AM_COLLECTOR_TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-host-analyzer
+              key: collector_timeout
+              optional: true
+        - name: SCHEDULE
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-host-analyzer
+              key: schedule
+              optional: true
+        - name: ANALYZE_AT_STARTUP
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-host-analyzer
+              key: analyze_at_startup
+              optional: true
+        - name: HOST_BASE
+          value: /host
+        - name: DIRS_TO_SCAN
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-host-analyzer
+              key: dirs_to_scan
+              optional: true
+        - name: MAX_SEND_ATTEMPTS
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-host-analyzer
+              key: max_send_attempts
+              optional: true
+        - name: VERIFY_CERTIFICATE
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-host-analyzer
+              key: ssl_verify_certificate
+              optional: true
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-host-analyzer
+              key: debug
+              optional: true
+        - name: HTTP_PROXY
+          valueFrom:
+            configMapKeyRef:
+              key: http_proxy
+              name: sysdig-host-analyzer
+              optional: true
+        - name: HTTPS_PROXY
+          valueFrom:
+            configMapKeyRef:
+              key: https_proxy
+              name: sysdig-host-analyzer
+              optional: true
+        - name: NO_PROXY
+          valueFrom:
+            configMapKeyRef:
+              key: no_proxy
+              name: sysdig-host-analyzer
+              optional: true
+      - name: sysdig-benchmark-runner
+        image: quay.io/sysdig/compliance-benchmark-runner:1.0.18.2
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          # The privileged flag is necessary for OCP 4.x and other Kubernetes setups that deny host filesystem access to
+          # running containers by default regardless of volume mounts. In those cases, the benchmark process would fail.
+          privileged: true
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 150m
+            memory: 128Mi
+        volumeMounts:
+          - mountPath: /opt/draios/etc/kubernetes/config
+            name: sysdig-agent-config
+          - mountPath: /host
+            name: root-vol
+            readOnly: true
+          - mountPath: /host/tmp
+            name: tmp-vol
+        env:
+        - name: ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sysdig-nodeanalyzer
+              key: access-key
+        - name: BACKEND_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-benchmark-runner
+              key: collector_endpoint
+        - name: BACKEND_VERIFY_TLS
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-benchmark-runner
+              key: ssl_verify_certificate
+              optional: true
+        - name: KUBERNETES_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: sysdig-benchmark-runner
+              key: debug
+              optional: true
+        - name: HTTP_PROXY
+          valueFrom:
+            configMapKeyRef:
+              key: http_proxy
+              name: sysdig-benchmark-runner
+              optional: true
+        - name: HTTPS_PROXY
+          valueFrom:
+            configMapKeyRef:
+              key: https_proxy
+              name: sysdig-benchmark-runner
+              optional: true
+        - name: NO_PROXY
+          valueFrom:
+            configMapKeyRef:
+              key: no_proxy
+              name: sysdig-benchmark-runner
+              optional: true
+
+      affinity: 
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                - linux
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+              - key: beta.kubernetes.io/os
+                operator: In
+                values:
+                - linux
+---
+# Source: sysdig-deploy/charts/kspmCollector/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sysdig-kspmcollector
+  namespace: sysdig-agent 
+  labels:
+    app.kubernetes.io/name: kspmcollector
+    helm.sh/chart: kspmCollector-0.1.10
+    app.kubernetes.io/instance: sysdig
+    app.kubernetes.io/version: "1.4.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kspmcollector
+      app.kubernetes.io/instance: sysdig
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kspmcollector
+        helm.sh/chart: kspmCollector-0.1.10
+        app.kubernetes.io/instance: sysdig
+        app.kubernetes.io/version: "1.4.0"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: kspm-collector
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+                  - arm64
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                  - linux
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+                  - arm64
+              - key: beta.kubernetes.io/os
+                operator: In
+                values:
+                  - linux
+      tolerations:
+      - key: kubernetes.io/arch
+        operator: Equal
+        value: arm64
+        effect: NoSchedule
+      containers:
+      - name: kspmcollector
+        image: quay.io/sysdig/kspm-collector:1.8.0
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1536Mi
+          requests:
+            cpu: 150m
+            memory: 256Mi
+        env:
+          - name: ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: sysdig-kspmcollector
+                key: access-key
+          - name: CLUSTER_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspmcollector
+                key: cluster_name
+          - name: INCLUDED_NAMESPACES
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspmcollector
+                key: included_namespaces
+          - name: EXCLUDED_NAMESPACES
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspmcollector
+                key: excluded_namespaces
+          - name: INCLUDED_WORKLOADS
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspmcollector
+                key: included_workloads
+          - name: EXCLUDED_WORKLOADS
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspmcollector
+                key: excluded_workloads
+          - name: HEALTH_INTERVAL_MINUTES
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspmcollector
+                key: health_interval_minutes
+          - name: ENVIRONMENT
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspmcollector
+                key: environment
+          - name: EXTERNAL_NATS_URL
+            valueFrom:
+              configMapKeyRef:
+                name: sysdig-kspmcollector
+                key: external_nats_url
+          - name: HTTP_PROXY
+            valueFrom:
+              configMapKeyRef:
+                key: http_proxy
+                name: sysdig-kspmcollector
+                optional: true
+          - name: HTTPS_PROXY
+            valueFrom:
+              configMapKeyRef:
+                key: https_proxy
+                name: sysdig-kspmcollector
+                optional: true
+          - name: NO_PROXY
+            valueFrom:
+              configMapKeyRef:
+                key: no_proxy
+                name: sysdig-kspmcollector
+                optional: true
+          - name: NATS_INSECURE
+            valueFrom:
+              configMapKeyRef:
+                key: nats_insecure
+                name: sysdig-kspmcollector
+                optional: true
+---
+# Source: sysdig-deploy/charts/agent/templates/tests/test-rollout.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "sysdig-agent-test-rollout"
+  labels:
+    helm.sh/chart: agent-1.5.22
+    app.kubernetes.io/version: "12.8.1"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  serviceAccountName: sysdig-agent
+  containers:
+    - name: kubectl
+      image: bitnami/kubectl:1.24.4
+      imagePullPolicy: IfNotPresent
+      command:
+      - kubectl
+      args:
+      - rollout
+      - status
+      - daemonset/sysdig-agent
+      - -n
+      - sysdig-agent
+      - -w
+      - --timeout=300s
+  restartPolicy: Never
